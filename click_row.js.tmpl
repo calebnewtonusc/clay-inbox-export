@@ -1,0 +1,16 @@
+(() => {
+  const re = /^[\w.+-]+@[\w.-]+\.[a-z]{2,}$/i;
+  let rows = [...document.querySelectorAll('div.flex.w-full.min-w-0.flex-row.items-center.justify-between')]
+    .filter(e => re.test((e.childNodes[0]?.textContent || '').trim()));
+  if (rows.length === 0) {
+    rows = [...document.querySelectorAll('div,li')]
+      .filter(e => re.test((e.childNodes[0]?.textContent || '').trim())
+                && (e.textContent || '').length < 400 && e.querySelector('*') !== null);
+  }
+  const r = rows[__IDX__];
+  if (!r) return 'NOROW';
+  const lab = r.closest('label') || r.parentElement;
+  lab.scrollIntoView({ block: 'center' });
+  lab.click();
+  return 'OK ' + (r.childNodes[0]?.textContent || '').trim();
+})()
