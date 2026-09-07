@@ -433,3 +433,52 @@ For a pipeline spreadsheet, one row per person, the columns worth having are:
 firm, contact, email, status, last contact date, next step, and a notes field
 that quotes the reply verbatim. Quote rather than paraphrase. The exact wording
 of a pass is the useful part.
+
+---
+
+## Part 7: a note on other sites, and on limits
+
+This technique is not specific to Clay. It reads whatever the logged-in browser
+can already see. That makes it worth being deliberate about where you point it.
+
+**Reading a tool your own team pays for, holding your own data, is just reading
+your own data.** That is what this skill was built for.
+
+**Third-party platforms are a different question.** Most prohibit automated
+access in their terms and actively detect it, and the consequence lands on the
+account, not the script. For an account that is carrying live fundraise or
+sales conversations, losing it costs far more than the data is worth.
+
+Two rules that follow from that:
+
+**Prefer the official path when one exists.** Most platforms have a data export
+for your own account, and it is almost always more complete than what the page
+renders. A rendered list shows the few hundred rows currently in the DOM; the
+export has everything, with fields the page never displays. If you are reaching
+for a scraper to get your own data, check for the export first.
+
+**Do not build evasion.** Rotating fingerprints, residential proxies, or timing
+jitter tuned to defeat detection converts an access question into an intent
+question, and intent is what turns a blocked request into a legal one. If a job
+only works by hiding that it is happening, that is the signal to buy the
+licensed version of the data instead. Enrichment vendors exist and are cheap
+next to the downside.
+
+### The governor
+
+`governor.py` in this kit enforces a human-scale read budget and keeps an
+append-only audit log. It is the opposite of evasion tooling: it exists so the
+volume stays inside limits you would hit anyway as a person, and so you can show
+exactly what was read and when.
+
+```
+./governor.py check <target>       # exit 0 to proceed, 1 to stop
+./governor.py log <target> [note]  # record a completed read
+./governor.py status               # budget remaining
+./governor.py report --csv         # full audit trail
+```
+
+Defaults are 40 reads per 24 hours, 12 per hour, and a 25 second minimum gap.
+Wrap any per-page loop in `check` before the read and `log` after it. If the
+governor keeps blocking you, the answer is a licensed data source, not a higher
+limit.
