@@ -329,8 +329,41 @@ zero rows. Capture into a variable first.
 loses exactly one reply, at the end, which is very easy not to notice. Write the
 index file with a trailing newline.
 
-**The reply list is virtualised.** Rows that have never been scrolled into view
-may not exist in the DOM. Scroll the list to the bottom once before running.
+**The reply list is virtualised, so positions move.** Rows that have never been
+scrolled into view do not exist in the DOM at all, and the rendered set changes
+as the user scrolls. A row index captured at the start of a run can point at a
+different person by the middle of it. Scroll the list to the bottom once before
+running, and if you re-open individual threads later, match on the email address
+rather than the index.
+
+**Verify the pane actually changed before you read it.** A click that does not
+register leaves the previous thread on screen, and the read succeeds and returns
+the wrong person's email, silently. After clicking, confirm the pane text
+contains the address you asked for, and retry if it does not. Two threads were
+misattributed this way before the check was added.
+
+**Do not fight the user for the front window.** `execute front window's active
+tab` grabs whatever tab is frontmost, so if the user is browsing while the
+script runs you will read their other tabs. Execute against the Clay tab object
+directly instead, which also avoids yanking their focus mid-run:
+
+```applescript
+on run argv
+	set needle to item 1 of argv
+	set jsFile to item 2 of argv
+	set js to (read (POSIX file jsFile) as «class utf8»)
+	tell application "Google Chrome"
+		repeat with w in windows
+			repeat with t in tabs of w
+				if (URL of t) contains needle then
+					return execute t javascript js
+				end if
+			end repeat
+		end repeat
+		return "NOTABFOUND"
+	end tell
+end run
+```
 
 **Never truncate the thread text.** The first version of this capped each pane
 at a few thousand characters, which silently cut the tail off long threads. The
