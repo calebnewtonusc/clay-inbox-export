@@ -154,7 +154,7 @@ class changes.
     let q = f;
     for (let i = 0; i < 12 && q; i++) { if ((q.innerText || '').length > 300) { p = q; break; } q = q.parentElement; }
   }
-  return JSON.stringify({ t: p ? p.innerText.slice(0, 6000) : 'NOPANE' });
+  return JSON.stringify({ t: p ? p.innerText : 'NOPANE' });
 })()
 ```
 
@@ -331,6 +331,13 @@ index file with a trailing newline.
 
 **The reply list is virtualised.** Rows that have never been scrolled into view
 may not exist in the DOM. Scroll the list to the bottom once before running.
+
+**Never truncate the thread text.** The first version of this capped each pane
+at a few thousand characters, which silently cut the tail off long threads. The
+tail is where the most recent messages live, so five threads looked like the
+founder had never replied when in fact he had answered days earlier. The read
+now takes the whole pane. If you add a cap for context reasons, cap from the
+END of the thread, never the start.
 
 **Do not re-run for fun.** Each run clicks through every thread in the user's
 real inbox. It is read-only, it never sends anything, but it does mark threads
